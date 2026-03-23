@@ -3,13 +3,15 @@
         .globl _abs
 
 _abs:
+        ld a, h
+        add a
+        ret nc
+        
         xor a
-        ex  de, hl
-        ld h, a
+        sub l
         ld l, a
-        sbc hl, de
-        ex de, hl
-        ret p
-        ex de, hl
+        sbc a
+        sub h
+        ld h, a
+        
         ret
-
