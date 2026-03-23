@@ -4,15 +4,16 @@
 
 ; int abs(int)
 _abs::
-        ld  a, d
-        ld  b, a
-        ld  c, e
-        add a
-        ret nc
+        ld b, d
+        ld c, e
+        bit 7, a
+        ret z
+
         xor a
         sub c
-        ld  c, a
-        ld  a, #0
-        sbc b
-        ld  b, a
+        ld c, a
+
+        sbc a
+        sub b
+        ld b, a
         ret
