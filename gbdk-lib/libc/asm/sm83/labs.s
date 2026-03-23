@@ -1,29 +1,8 @@
 ;--------------------------------------------------------------------------
 ;  labs.s
 ;
-;  Copyright (C) 2020, Tony Pavlov
+;  Copyright (c) 2026, Phidias618
 ;
-;  This library is free software; you can redistribute it and/or modify it
-;  under the terms of the GNU General Public License as published by the
-;  Free Software Foundation; either version 2, or (at your option) any
-;  later version.
-;
-;  This library is distributed in the hope that it will be useful,
-;  but WITHOUT ANY WARRANTY; without even the implied warranty of
-;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-;  GNU General Public License for more details.
-;
-;  You should have received a copy of the GNU General Public License 
-;  along with this library; see the file COPYING. If not, write to the
-;  Free Software Foundation, 51 Franklin Street, Fifth Floor, Boston,
-;   MA 02110-1301, USA.
-;
-;  As a special exception, if you link this library with other files,
-;  some of which are compiled with SDCC, to produce an executable,
-;  this library does not by itself cause the resulting executable to
-;  be covered by the GNU General Public License. This exception does
-;  not however invalidate any other reasons why the executable file
-;   might be covered by the GNU General Public License.
 ;--------------------------------------------------------------------------
 
         .module labs
@@ -39,32 +18,26 @@ _labs::
         ld      D, A
         ld      A, (HL+)
         ld      H, (HL)
-        ld      L, A            ; DEHL = num
-
+        ld      L, A            ; HLDE = num
 .labs::
-        ld      A, H
-        add     A, A
-        ret     NC
+        bit 7, h
+        ret z                   ; return if HLDE >= 0
 
-1$:
-        ld      A, E
-        cpl
-        add     #1
-        ld      E, A
+        ; HLDE = -HLDE
+        xor a
+        sub e
+        ld e, a
+        
+        sbc a
+        sub d
+        ld d, a
 
-        ld      A, D
-        cpl
-        adc     #0
-        ld      D, A
+        sbc a
+        sub l
+        ld l, a
 
-        ld      A, L
-        cpl
-        adc     #0
-        ld      L, A
-
-        ld      A, H
-        cpl
-        adc     #0
-        ld      H, A
+        sbc a
+        sub h
+        ld h, a
 
         ret 
