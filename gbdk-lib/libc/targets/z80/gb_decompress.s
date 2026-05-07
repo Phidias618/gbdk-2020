@@ -26,7 +26,6 @@ _gb_decompress::
         bit     6, a
         jr      nz, 3$
         ; RLE byte
-        and     #63     ; calc counter
         inc     a
         ld      b, a
         ld      a, (hl)
@@ -34,8 +33,7 @@ _gb_decompress::
 2$:
         ld      (de), a
         inc     de
-        dec     b
-        jp      nz, 2$
+        djnz    2$
         jp      1$      ; next command
 3$:                     ; RLE word
         and     #63
@@ -60,10 +58,11 @@ _gb_decompress::
         ; string repeat
         and     #63
         inc     a
-        push    hl
         ld      c, (hl)
         inc     hl
         ld      b, (hl)
+        inc     hl
+        push    hl
         ld      h, d
         ld      l, e
         add     hl, bc
@@ -71,8 +70,6 @@ _gb_decompress::
         ld      b, #0
         ldir
         pop     hl
-        inc     hl
-        inc     hl
         jp      1$      ; next command
 6$:                     ; string copy
         and     #63
@@ -84,7 +81,6 @@ _gb_decompress::
 7$:
         pop     hl
         ex      de, hl
-        or      a       ; clear carry flag
-        sbc     hl, de
+        sbc     hl, de        ; the carry is cleared
         pop     bc
         ret
