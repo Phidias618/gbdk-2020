@@ -24,25 +24,26 @@ __map_tile_offset::
         AND     #LCDCF_BG9C00
         JR      NZ,.is9c
 .is98:
-        LD      HL,#0x9800
+        LD      H,#0x98
         JR      .set_xy_tt
 .is9c:
-        LD      HL,#0x9C00
-        ;; Set background tile from (BC) at XY = DE, size WH on stack, to vram from address (HL)
+        LD      H,#0x9C
+        ;; Set background tile from (BC) at XY = DE, size WH on stack, to vram from address (H << 8)
 .set_xy_tt::
-
-        ld a, d
+        ld l, d
+        ld a, e
+        add a
+        add a
+        add a
+        add a
         ld d, #0
-        add hl, de
-        add hl, de
-        add hl, de
-        add hl, de
-        add hl, de
+        rr d
         ld e, a
-        add hl, de             ; dest HL = HL + 0x20 * Y + X  
+        add hl, de
+        add hl, de
 
         ld d, h
-        ld e, l
+        ld e, l                ; dest de = (H << 8) + 0x20 * Y + X
 
         ld h, b
         ld l, c
