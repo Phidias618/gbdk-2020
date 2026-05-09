@@ -53,15 +53,14 @@ __map_tile_offset::
         push de                ; store dest
 
         ; Copy W tiles
-1$:
         ld a, (__map_tile_offset)
-        add (hl)
         ld c, a
+1$:
         WAIT_STAT
-        ld a, c
+        ld a, (hl+)
+        add c
         ld (de), a
-        inc hl
-
+        
         ; inc dest and wrap around
         inc e
         ld a, e
