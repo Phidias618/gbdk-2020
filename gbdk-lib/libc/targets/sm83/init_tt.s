@@ -22,6 +22,7 @@
 .init_tt::
         LD      DE,#0x0400      ; One whole GB Screen
 
+        ;; fill VRAM with the byte stored in B starting from HL for DE bytes
 .init_vram::
         SRL     D
         RR      E
@@ -31,9 +32,6 @@
         LD      A, B
         LD      (HL+),A
 1$:
-        LD      A, D
-        OR      E
-        RET     Z
         
         INC     D
         INC     E
