@@ -3,14 +3,10 @@
         .title  "Set tile map"
         .module SetTileMap
 
-        .area   _INITIALIZED
+        .area   _DATA
 
 __map_tile_offset::
         .ds     0x01
-
-        .area   _INITIALIZER
-
-        .db     0x00
 
         .area   _HOME
 
@@ -28,74 +24,75 @@ __map_tile_offset::
         AND     #LCDCF_BG9C00
         JR      NZ,.is9c
 .is98:
-        LD      HL,#0x9800
-        JR      .set_xy_tt
+        ld h, #0x98
+        jr .set_xy_tt
 .is9c:
-        LD      HL,#0x9C00
-        ;; Set background tile from (BC) at XY = DE, size WH on stack, to vram from address (HL)
+        ld h, #0x9C
+        ;; Set background tile from (BC) at XY = DE, size WH on stack, to vram from address (H << 8)
 .set_xy_tt::
-        PUSH    BC              ; Store source
+        ld l, d
+        ld a, e
+        add a
+        add a
+        add a
+        add a
+        ld d, #0
+        rl d
+        ld e, a
+        add hl, de
+        add hl, de
 
-        SWAP    E
-        RLC     E
-        LD      A,E
-        AND     #0x03
-        ADD     H
-        LD      B,A
-        LD      A,#0xE0
-        AND     E
-        ADD     D
-        LD      C,A             ; dest BC = HL + 0x20 * Y + X
+        ld d, h
+        ld e, l                ; dest de = (H << 8) + 0x20 * Y + X
 
-        POP     HL              ; HL = source
-        POP     DE              ; DE = WH
-        PUSH    DE              ; store WH
-        PUSH    BC              ; store dest
+        ld h, b
+        ld l, c
 
-3$:                             ; Copy W tiles
+        pop bc                ; bc = WH
+0$:
+        push bc               ; store WH
+        push de               ; store dest
 
-        LD      A, (__map_tile_offset)
-        ADD     (HL)
-        LD      E, A
+1$:
+        ld a, (__map_tile_offset)
+        add (hl)
+        ld c, a
         WAIT_STAT
-        LD      A, E
-        LD      (BC), A
-        INC     HL
+        ld a, c
+        ld (de), a
+        inc hl
+
+        ; inc dest and wrap around
+        inc e
+        ld a, e
+        and #0x1F
+        jr nz, 2$
+        ld a, e
+        sub #0x20
+        ld e, a
+2$:
+
+        dec b
+        jr nz, 1$
+
+        pop de                ; get dest
+        pop bc                ; get WH
+
+        dec c
+        ret z
         
-        LD      A, C            ; inc dest and wrap around
-        AND     #0xE0
-        LD      E, A
-        LD      A, C
-        INC     A
-        AND     #0x1F
-        OR      E
-        LD      C, A
-
-        DEC     D
-        JR      NZ, 3$
-
-        POP     BC
-        POP     DE
-
-        DEC     E
-        RET     Z
-
-        PUSH    DE
-
-        LD      A, B            ; next row and wrap around
-        AND     #0xFC
-        LD      E, A            ; save high bits
-
-        LD      A,#0x20
-
-        ADD     C
-        LD      C, A
-        ADC     B
-        SUB     C
-        AND     #0x03
-        OR      E               ; restore high bits
-        LD      B, A
-
-        PUSH    BC
+        ; next row and wrap around
+        ld a, e
+        add #32 
+        ld e, a
+        jr nc, 0$
         
-        JR      3$
+        ld a, d
+        rrca
+        rrca
+        add #64
+        rlca
+        rlca
+        ld d, a
+
+        jr 0$
