@@ -28,30 +28,27 @@ _set_bkg_tile_xy::
         ld      b,#0x9C
 
 .set_tile_xy:                   ; DE = XY; B = origin
-        ld      l, #0x1f
-        ld      a, d
-        and     l
-        ld      d, a
-        ld      a, e
-        and     l
-
-        ld      c, b
-        swap    a
-        rlca
-        ld      e, a
-        and     #0x03
-        add     c
-        ld      b, a
-        ld      a, #0xE0
-        and     e
-        add     d
-        ld      c, a            ; dest BC = (BASE << 8) + 0x20 * Y + X
-
-        ldhl    sp, #2
+        ldhl sp, #2
+        ld c, (hl)
+        
+        ld l, d
+        ld e, a
+        add a
+        add a
+        add a
+        add a
+        ld d, #0
+        rl d
+        ld e, a
+        add hl, de
+        add hl, de              ; dest hl = (BASE << 8) + 0x20 * Y + X            
+        
         WAIT_STAT
-        ld      a, (hl)
-        ld      (bc), a         ; return BC as result
+        ld (hl), c
 
+        ld b, h
+        ld c, l                 ; return dest in BC 
+        
         pop     hl
         inc     sp
         jp      (hl)
