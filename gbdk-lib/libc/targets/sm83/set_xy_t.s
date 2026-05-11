@@ -37,7 +37,7 @@ __map_tile_offset::
         add a
         add a
         ld d, #0
-        rr d
+        rl d
         ld e, a
         add hl, de
         add hl, de
