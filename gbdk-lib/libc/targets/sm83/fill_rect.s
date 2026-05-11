@@ -22,64 +22,60 @@
 
         ;; fills rectangle area with tile B at XY = DE, size WH on stack, to vram from address (HL)
 .fill_rect:
-        PUSH    BC              ; Store source
+        ld a, e
+        ld e, d
+        ld d, #0
+        add hl, de
+        add a
+        add a
+        add a
+        add a
+        rl d
+        ld e, a
+        add hl, de
+        add hl, de            ; dest HL = HL + 0x20 * Y + X
 
-        SWAP    E
-        RLC     E
-        LD      A,E
-        AND     #0x03
-        ADD     H
-        LD      B,A
-        LD      A,#0xE0
-        AND     E
-        ADD     D
-        LD      C,A             ; dest BC = HL + 0x20 * Y + X
+        pop de                ; DE = WH
+0$:
+        push de               ; store WH
+        push hl               ; store dest
 
-        POP     HL              ; H = Tile
-        POP     DE              ; DE = WH
-        PUSH    DE              ; store WH
-        PUSH    BC              ; store dest
-
-3$:                             ; Copy W tiles
-
+        ; Set W tiles
+1$:                             
         WAIT_STAT
-        LD      A, H
-        LD      (BC), A
+        LD      (HL), B
+
+        ; inc dest and wrap around
+        inc l
+        ld a, l
+        and #0x1F
+        jr nz, 2$
+        ld a, l
+        sub #0x20
+        ld l, a
+2$:
+
+        dec d
+        jr nz, 1$
+
+        pop hl
+        pop de
+
+        dec e
+        ret z
+
+        ; next row and wrap around
+        ld a, l
+        add #0x20
+        ld l, a
+        jr nc, 0$
+
+        ld a, h
+        rrca
+        rrca
+        add #64
+        rlca
+        rlca
+        ld h, a
         
-        LD      A, C            ; inc dest and wrap around
-        AND     #0xE0
-        LD      E, A
-        LD      A, C
-        INC     A
-        AND     #0x1F
-        OR      E
-        LD      C, A
-
-        DEC     D
-        JR      NZ, 3$
-
-        POP     BC
-        POP     DE
-
-        DEC     E
-        RET     Z
-
-        PUSH    DE
-
-        LD      A, B            ; next row and wrap around
-        AND     #0xFC
-        LD      E, A            ; save high bits
-
-        LD      A,#0x20
-
-        ADD     C
-        LD      C, A
-        ADC     B
-        SUB     C
-        AND     #0x03
-        OR      E               ; restore high bits
-        LD      B, A
-
-        PUSH    BC
-        
-        JR      3$
+        jr 0$
