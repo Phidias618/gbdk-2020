@@ -32,6 +32,8 @@ _set_bkg_tile_xy::
         ld c, (hl)
         
         ld l, d
+        ld h, b
+        
         ld e, a
         add a
         add a
