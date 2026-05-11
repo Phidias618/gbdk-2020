@@ -15,25 +15,24 @@
         AND     #LCDCF_BG9C00
         JR      NZ,.is9c
 .is98:
-        LD      HL,#0x9800      ; HL = origin
+        LD      H,#0x98      ; (H << 8) = origin
         JR      .fill_rect
 .is9c:
-        LD      HL,#0x9C00      ; HL = origin
+        LD      H,#0x9C      ; (H << 8) = origin
 
-        ;; fills rectangle area with tile B at XY = DE, size WH on stack, to vram from address (HL)
+        ;; fills rectangle area with tile B at XY = DE, size WH on stack, to vram from address (H << 8)
 .fill_rect:
+        ld l, d
         ld a, e
-        ld e, d
+        add a
+        add a
+        add a
+        add a
         ld d, #0
-        add hl, de
-        add a
-        add a
-        add a
-        add a
         rl d
         ld e, a
         add hl, de
-        add hl, de            ; dest HL = HL + 0x20 * Y + X
+        add hl, de            ; dest HL = origin + 0x20 * Y + X
 
         pop de                ; DE = WH
 0$:
