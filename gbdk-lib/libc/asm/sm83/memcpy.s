@@ -42,6 +42,9 @@ ___memcpy::
 	;src in bc
 	;n in sp+2,sp+3
 	push	de
+
+	ldhl sp, #ofs
+	
 	ldhl	sp, #5
 	ld	a, (hl-)
 	ld	l, (hl)
